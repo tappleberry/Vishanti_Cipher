@@ -15,8 +15,13 @@ def hide_message(image_path, output_path, message, password):
 def reveal_message(image_path, password):
     image = load_image(image_path)
 
-    payload = bytes(decode_payload(image))
+    try:
+        payload = bytes(decode_payload(image))
+        message = decrypt_message(payload, password)
+        return message
 
-    message = decrypt_message(payload, password)
-
-    return message
+    except Exception as exc:
+        raise ValueError(
+            f"Message recovery failed during extraction or decryption: "
+            f"{type(exc).__name__}: {exc}"
+        ) from exc

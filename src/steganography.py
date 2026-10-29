@@ -72,23 +72,33 @@ def encode_payload(image, payload):
 
 
 def decode_payload(image):
-
     flat = image.reshape(-1)
+
+    header_bits = 8 * HEADER_SIZE
+
+    if len(flat) < header_bits:
+        raise ValueError("Image is too small to contain a payload header.")
 
     size = 0
 
-    for i in range(8 * HEADER_SIZE):
-        size = (size << 1) | get_lsb(flat[i])
+    for i in range(header_bits):
+        size = (size << 1) | int(get_lsb(flat[i]))
+
+    available_bits = len(flat) - header_bits
+    available_bytes = available_bits // 8
+
+    if size > available_bytes:
+        raise ValueError(
+            f"Invalid payload size: header declares {size} bytes, "
+            f"but image can contain only {available_bytes} bytes."
+        )
 
     bits = []
 
     for i in range(size * 8):
-        bits.append(get_lsb(flat[i + HEADER_SIZE * 8]))
+        bits.append(int(get_lsb(flat[i + header_bits])))
 
-    data = bits_to_bytes(bits)
-
-    return data
-
+    return bits_to_bytes(bits)
 
 def save_stego_image(image, path):
 

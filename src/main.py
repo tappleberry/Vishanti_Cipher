@@ -120,8 +120,11 @@ class VishantiCipher(QWidget):
             )
         except Exception as error:
             QMessageBox.critical(
-                self, "Error", "Could not recover the message. "
-                "Check the image and password."
+                self,
+                "Error",
+                f"Could not recover the message.\n\n"
+                f"Error type: {type(error).__name__}\n"
+                f"Details: {error}"
             )
 
 
